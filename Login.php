@@ -10,7 +10,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
 }
  
 // Include config file
-require_once "config.php";
+require_once "Config.php";
  
 // Define variables and initialize with empty values
 $username = $password = "";
@@ -36,7 +36,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Validate credentials
     if(empty($username_err) && empty($password_err)){
         // Prepare a select statement
-        $sql = "SELECT id, username, password, type FROM users WHERE username = :username";
+        $sql = "SELECT  Account_type, username, password FROM user_account WHERE username =:username";
         
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
@@ -50,39 +50,42 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // Check if username exists, if yes then verify password
                 if($stmt->rowCount() == 1){
                     if($row = $stmt->fetch()){
-                        $id = $row["id"];
+                        //$id = $row["id"];
                         $username = $row["username"];
                         $hashed_password = $row["password"];
-                        $type = $row["type"];
+                        $Account_type = $row["Account_type"];
+                 
                         if(password_verify($password, $hashed_password)){
                             // Password is correct, so start a new session
                             session_start();
                             
                             // Store data in session variables
                             $_SESSION["loggedin"] = true;
-                            $_SESSION["id"] = $id;
+                            //$_SESSION["id"] = $id;
+                            $_SESSION["Account_type"]= $Account_type;
                             $_SESSION["username"] = $username;
-                            $_SESSION["type"]= $type;
+                            
+                            //$_SESSION["school"] = $school; 
                             //Check user type
-                            if($_SESSION['type'] == '1'){
+                            if($_SESSION["Account_type"] == '1'){
                             // Redirect user to welcome page
-                            header("location: welcome.php");
-                            
+                            header("location: welcome.php"); 
+                                                  
                             }
-                            
                             else{
-                                
+                                //Redirec user to other page
                                 header("location: welcome2.php");
                                 
                             }
                         } else{
                             // Password is not valid, display a generic error message
-                            $login_err = "Invalid username or password.";
+                            $login_err = "Invalid password.";
+                            echo $Account_type," ", $password," ", $username," ", $hashed_password;
                         }
                     }
                 } else{
                     // Username doesn't exist, display a generic error message
-                    $login_err = "Invalid username or password.";
+                    $login_err = "Invalid username.";
                 }
             } else{
                 echo "Oops! Something went wrong. Please try again later.";
@@ -104,13 +107,57 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body{ font: 14px sans-serif; alignment-adjust: central  }
-        .wrapper{ width: 360px; padding: 20px; }
-    </style>
+        body{ 
+              font-family: 14px monospace; 
+              alignment-adjust: central; 
+              background-image: url('img//SMS.jpg');
+              background-repeat: no-repeat;
+              background-attachment: fixed;
+              background-size: cover;          
+        }
+        .wrapper{ 
+            width: 360px; 
+            position: absolute;
+            left: 50%;
+            top: 70%;
+            transform: translate(-50%, -50%);
+            padding: 10px;
+          
+        }   
+        #corner
+        {
+            border-radius: 20px;
+            box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+        }
+        #btnlogin
+        {
+          
+            width: 68px;
+            height: 36px;
+            left: 260px;
+            top: 225px;
+            background: rgba(41, 217, 255, 0.8);
+            box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            background: rgba(41, 217, 255, 0.8);
+            box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+        }  
+        label 
+            {
+            display: inline-block;
+            width: 140px;
+            text-align: left;
+            }
+
+</style>
 </head>
 <body>
+  
+   <div ><img src="logos\SMSlogo.png" alt="Smiley face" width="100" height="100" style="position: absolute; left: 240px; top: 250px"> 
+        <h2 style="position: absolute; left: 350px; top: 50px">Saint Mark's School of Quirino</h2>
+    </div>
     <div class="wrapper">
-        <h2>Login</h2>
         <p>Please fill in your credentials to login.</p>
 
         <?php 
@@ -122,19 +169,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $username; ?>">
+                <input id="corner" type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $username; ?>">
                 <span class="invalid-feedback"><?php echo $username_err; ?></span>
             </div>    
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>">
+                <input id="corner" type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>">
                 <span class="invalid-feedback"><?php echo $password_err; ?></span>
             </div>
             <div class="form-group">
-                <p> <a href="Reset-Password.php">forgot Password?</a></p>
-                <input type="submit" class="btn btn-primary" value="Login">
+                <input id="btnlogin" type="submit" class="btn btn-primary" value="Login">
             </div>
-            <p>Don't have an account? <a href="register.php">Sign up now</a>.</p>
         </form>
     </div>
 </body>
